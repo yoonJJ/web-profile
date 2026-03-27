@@ -74,12 +74,3 @@ web_profile/
 ## License
 
 이 프로젝트는 개인 포트폴리오 용도로 제작되었습니다.
-# web-profile
-# web-profile
-# web-profile
-# web-profile
-# web-profile
-# web-profile
-# web-profile
-# web-profile
-# web-profile
