@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TodoList 백엔드 포트폴리오</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --accent: #2563eb;
+      --accent-light: #eff6ff;
+      --text: #111827;
+      --sub: #6b7280;
+      --border: #e5e7eb;
+      --bg: #f9fafb;
+      --white: #ffffff;
+      --code-bg: #f3f4f6;
+      --green: #16a34a;
+      --red: #dc2626;
+      --amber: #d97706;
+      --slide-w: 1280px;
+      --slide-h: 720px;
+    }
+
+    html, body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: #dde1e7;
+      height: 100%;
+      overflow: hidden;
+      color: var(--text);
+    }
+
+    #app {
+      width: 100vw;
+      height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #stage {
+      width: var(--slide-w);
+      height: var(--slide-h);
+      position: relative;
+      box-shadow: 0 8px 40px rgba(0,0,0,.18);
+    }
+
+    @media (max-width: 1300px) { #stage { transform: scale(0.9); transform-origin: center; } }
+    @media (max-width: 1160px) { #stage { transform: scale(0.8); transform-origin: center; } }
+    @media (max-width: 1030px) { #stage { transform: scale(0.7); transform-origin: center; } }
+    @media (max-width:  900px) { #stage { transform: scale(0.6); transform-origin: center; } }
+    @media (max-width:  780px) { #stage { transform: scale(0.5); transform-origin: center; } }
+
+    /* ── Slide ── */
+    .slide {
+      position: absolute;
+      inset: 0;
+      background: var(--white);
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .3s ease;
+      overflow: hidden;
+    }
+    .slide.active { opacity: 1; pointer-events: all; }
+
+    /* 왼쪽 색 바 */
+    .slide-inner {
+      display: flex;
+      flex: 1;
+      min-height: 0;
+    }
+    .side-bar {
+      width: 6px;
+      background: var(--accent);
+      flex-shrink: 0;
+    }
+    .slide-body {
+      flex: 1;
+      padding: 52px 64px 44px;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    /* ── 슬라이드 헤더 ── */
+    .slide-header {
+      margin-bottom: 32px;
+    }
+    .slide-category {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+    .slide-title {
+      font-size: 34px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1.2;
+    }
+    .slide-title span {
+      color: var(--accent);
+    }
+    .slide-desc {
+      margin-top: 10px;
+      font-size: 15px;
+      color: var(--sub);
+      line-height: 1.7;
+    }
+    .title-divider {
+      width: 40px;
+      height: 3px;
+      background: var(--accent);
+      margin-top: 14px;
+    }
+
+    /* ── 하단 바 ── */
+    .slide-footer {
+      height: 40px;
+      background: var(--bg);
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px 0 26px;
+      flex-shrink: 0;
+    }
+    .footer-project {
+      font-size: 12px;
+      color: var(--sub);
+      font-weight: 500;
+    }
+    .footer-num {
+      font-size: 12px;
+      color: var(--sub);
+    }
+
+    /* ── 카드 ── */
+    .card {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px 22px;
+    }
+    .card-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--sub);
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 12px;
+    }
+
+    /* ── 배지 ── */
+    .badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .badge-blue   { background: var(--accent-light); color: var(--accent); }
+    .badge-green  { background: #f0fdf4; color: var(--green); }
+    .badge-red    { background: #fef2f2; color: var(--red); }
+    .badge-amber  { background: #fffbeb; color: var(--amber); }
+    .badge-gray   { background: var(--code-bg); color: #374151; }
+
+    /* ── 테이블 ── */
+    .ppt-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+    }
+    .ppt-table th {
+      padding: 9px 14px;
+      text-align: left;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--sub);
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      letter-spacing: .06em;
+      text-transform: uppercase;
+    }
+    .ppt-table td {
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      vertical-align: middle;
+    }
+    .ppt-table tr:last-child td { border-bottom: none; }
+
+    /* ── 코드 블럭 ── */
+    .code-block {
+      background: #1e1e1e;
+      border-radius: 8px;
+      padding: 18px 20px;
+      font-family: 'Consolas', 'Fira Code', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      color: #d4d4d4;
+      overflow: hidden;
+    }
+    .kw   { color: #569cd6; }
+    .cls  { color: #4ec9b0; }
+    .str  { color: #ce9178; }
+    .cmt  { color: #6a9955; }
+    .fn   { color: #dcdcaa; }
+    .num  { color: #b5cea8; }
+    .type { color: #4ec9b0; }
+    .ann  { color: #9cdcfe; }
+    .op   { color: #d4d4d4; }
+
+    /* ── HTTP 메서드 ── */
+    .method {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 12px;
+      font-weight: 700;
+      font-family: monospace;
+      min-width: 56px;
+      text-align: center;
+    }
+    .get    { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+    .post   { background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+    .put    { background: #fffbeb; color: #92400e; border: 1px solid #fde68a; }
+    .delete { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+
+    /* ── 레이아웃 ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+    .flex   { display: flex; }
+    .flex-col { display: flex; flex-direction: column; }
+    .gap-8  { gap: 8px; }
+    .gap-12 { gap: 12px; }
+    .gap-16 { gap: 16px; }
+    .gap-20 { gap: 20px; }
+    .items-center { align-items: center; }
+    .flex-1 { flex: 1; }
+
+    /* ── 아키텍처 흐름 ── */
+    .arch-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 28px;
+    }
+    .arch-node {
+      flex: 1;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 10px;
+      text-align: center;
+      background: var(--bg);
+    }
+    .arch-node.accent {
+      border-color: var(--accent);
+      background: var(--accent-light);
+    }
+    .arch-node-title {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .arch-node-sub {
+      font-size: 11px;
+      color: var(--sub);
+      margin-top: 3px;
+    }
+    .arch-arrow {
+      flex-shrink: 0;
+      width: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--border);
+      font-size: 18px;
+      font-weight: 300;
+    }
+
+    /* ── 피처 리스트 ── */
+    .feat-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 11px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .feat-row:last-child { border-bottom: none; }
+    .feat-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--accent);
+      flex-shrink: 0;
+      margin-top: 6px;
+    }
+    .feat-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 2px; }
+    .feat-desc  { font-size: 13px; color: var(--sub); line-height: 1.5; }
+
+    /* ── 스탯 ── */
+    .stat-box {
+      text-align: center;
+      padding: 20px 10px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--white);
+    }
+    .stat-num   { font-size: 38px; font-weight: 700; color: var(--accent); line-height: 1; }
+    .stat-label { font-size: 12px; color: var(--sub); margin-top: 6px; }
+
+    /* ── 네비게이션 ── */
+    #nav {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 8px 18px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.1);
+    }
+    #nav button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--sub);
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+    #nav button:hover { background: var(--bg); color: var(--text); }
+    #slide-counter { font-size: 13px; color: var(--sub); min-width: 48px; text-align: center; }
+
+    #dots {
+      position: fixed;
+      right: 24px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    .dot-nav {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #cbd5e1;
+      cursor: pointer;
+      transition: background .2s, transform .2s;
+    }
+    .dot-nav.active { background: var(--accent); transform: scale(1.4); }
+
+    /* ── Hero 슬라이드 전용 ── */
+    .hero-left {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 52px 48px 52px 64px;
+      border-right: 1px solid var(--border);
+    }
+    .hero-right {
+      width: 380px;
+      background: var(--bg);
+      padding: 52px 40px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 14px;
+    }
+    .hero-title {
+      font-size: 48px;
+      font-weight: 700;
+      line-height: 1.15;
+      color: var(--text);
+    }
+    .hero-title span { color: var(--accent); }
+    .hero-sub {
+      font-size: 15px;
+      color: var(--sub);
+      line-height: 1.75;
+      margin-top: 14px;
+      max-width: 420px;
+    }
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 28px;
+    }
+
+    /* ── tech-stack card ── */
+    .tech-item {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 14px;
+      background: var(--white);
+    }
+    .tech-name { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 3px; }
+    .tech-ver  { font-size: 12px; color: var(--sub); }
+    .tech-role { font-size: 12px; color: var(--sub); margin-top: 6px; line-height: 1.4; }
+
+    /* ── 구분선 ── */
+    .section-line {
+      width: 100%;
+      height: 1px;
+      background: var(--border);
+      margin: 16px 0;
+    }
+
+    /* ── 인라인 코드 ── */
+    code {
+      background: var(--code-bg);
+      color: #374151;
+      padding: 1px 6px;
+      border-radius: 3px;
+      font-family: 'Consolas', monospace;
+      font-size: .9em;
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+<div id="stage">
+
+
+<!-- ======================================
+     S1 · 표지
+====================================== -->
+<div class="slide active" id="slide-0">
+  <div class="slide-inner" style="flex:1; min-height:0;">
+    <div class="side-bar"></div>
+    <div class="hero-left">
+      <div class="slide-category">Backend Portfolio</div>
+      <div class="hero-title">
+        TodoList<br><span>백엔드 프로젝트</span>
+      </div>
+      <p class="hero-sub">
+        Spring Boot 기반의 할 일 관리 웹 애플리케이션입니다.<br>
+        RESTful API 설계, 계층형 아키텍처, JdbcTemplate을 이용한<br>
+        직접적인 SQL 제어를 중점으로 구현했습니다.
+      </p>
+      <div class="tag-row">
+        <span class="badge badge-blue">Spring Boot 3.5.4</span>
+        <span class="badge badge-gray">Java 21</span>
+        <span class="badge badge-green">H2 Database</span>
+        <span class="badge badge-amber">Thymeleaf</span>
+        <span class="badge badge-gray">JdbcTemplate</span>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span class="footer-project">TodoList Backend</span>
+    <span class="footer-num">1 / 9</span>
+  </div>
+</div>
+
+
+<!-- ======================================
+     S2 · 기술 스택
+====================================== -->
+<div class="slide" id="slide-1">
+  <div class="slide-inner">
+    <div class="side-bar"></div>
+    <div class="slide-body">
+      <div class="slide-header">
+        <div class="slide-category">Tech Stack</div>
+        <div class="slide-title">사용 기술 스택</div>
+        <div class="title-divider"></div>
+      </div>
+
+      <div class="grid-4" style="margin-bottom:18px;">
+        <div class="tech-item">
+          <div class="tech-name">Java 21</div>
+          <div class="tech-ver">LTS 버전</div>
+          <div class="tech-role">언어 기반. Record, Pattern Matching 등 최신 문법 활용 가능</div>
+        </div>
+        <div class="tech-item">
+          <div class="tech-name">Spring Boot 3.5.4</div>
+          <div class="tech-ver">최신 릴리즈</div>
+          <div class="tech-role">자동 설정, 내장 Tomcat 제공. 빠른 애플리케이션 구성</div>
+        </div>
+        <div class="tech-item">
+          <div class="tech-name">Spring JDBC</div>
+          <div class="tech-ver">JdbcTemplate</div>
+          <div class="tech-role">ORM 없이 직접 SQL 작성. DB 동작 흐름을 명시적으로 제어</div>
+        </div>
+        <div class="tech-item">
+          <div class="tech-name">H2 Database</div>
+          <div class="tech-ver">In-Memory</div>
+          <div class="tech-role">별도 DB 설치 없이 즉시 실행. /h2-console로 실시간 조회 가능</div>
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-bottom:18px;">
+        <div class="tech-item">
+          <div class="tech-name">Thymeleaf</div>
+          <div class="tech-ver">서버사이드 템플릿</div>
+          <div class="tech-role">Spring MVC와 자연스럽게 통합. HTML에 직접 렌더링</div>
+        </div>
+        <div class="tech-item">
+          <div class="tech-name">Spring Web MVC</div>
+          <div class="tech-ver">REST + View</div>
+          <div class="tech-role">REST API 컨트롤러와 View 컨트롤러를 분리해 역할 명확화</div>
+        </div>
+        <div class="tech-item">
+          <div class="tech-name">Gradle</div>
+          <div class="tech-ver">빌드 도구</div>
+          <div class="tech-role">의존성 관리, 빌드 자동화. Groovy DSL 기반 스크립트 구성</div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:16px 20px;">
+        <div class="flex gap-20">
+          <div>
+            <div class="card-title" style="margin-bottom:4px;">기술 선택 배경</div>
+            <p style="font-size:13px; color:var(--sub); line-height:1.6;">JPA 대신 JdbcTemplate을 선택해 SQL을 직접 작성함으로써 ORM이 감추는 DB 동작 원리를 명확하게 이해하는 것을 목표로 했습니다.</p>
+          </div>
+          <div style="width:1px; background:var(--border); flex-shrink:0;"></div>
+          <div>
+            <div class="card-title" style="margin-bottom:4px;">DB 전략</div>
+            <p style="font-size:13px; color:var(--sub); line-height:1.6;">H2 인메모리 DB를 사용해 환경 설정 없이 바로 실행 가능한 독립적인 개발 환경을 구성했습니다. <code>schema.sql</code>로 스키마를 자동 초기화합니다.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span class="footer-project">TodoList Backend</span>
+    <span class="footer-num">2 / 9</span>
+  </div>
+</div>
+
+
+<!-- ======================================
+     S3 · 아키텍처
+====================================== -->
+<div class="slide" id="slide-2">
+  <div class="slide-inner">
+    <div class="side-bar"></div>
+    <div class="slide-body">
+      <div class="slide-header">
+        <div class="slide-category">Architecture</div>
+        <div class="slide-title">계층형 아키텍처</div>
+        <div class="title-divider"></div>
+      </div>
+
+      <div class="arch-wrap">
+        <div class="arch-node accent">
+          <div class="arch-node-title">Client</div>
+          <div class="arch-node-sub">Browser / JS</div>
+        </div>
+        <div class="arch-arrow">›</div>
+        <div class="arch-node">
+          <div class="arch-node-title">Controller</div>
+          <div class="arch-node-sub">@RestController</div>
+        </div>
+        <div class="arch-arrow">›</div>
+        <div class="arch-node">
+          <div class="arch-node-title">Service</div>
+          <div class="arch-node-sub">@Service</div>
+        </div>
+        <div class="arch-arrow">›</div>
+        <div class="arch-node">
+          <div class="arch-node-title">Repository</div>
+          <div class="arch-node-sub">@Repository</div>
+        </div>
+        <div class="arch-arrow">›</div>
+        <div class="arch-node">
+          <div class="arch-node-title">H2 DB</div>
+          <div class="arch-node-sub">In-Memory</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <div class="card-title">레이어별 역할</div>
+          <table class="ppt-table">
+            <thead>
+              <tr><th>레이어</th><th>클래스</th><th>역할</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="badge badge-blue">Controller</span></td>
+                <td><code>TodoController</code></td>
+                <td style="font-size:13px;">HTTP 요청·응답. REST API 처리</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-blue">Controller</span></td>
+                <td><code>TodoViewController</code></td>
+                <td style="font-size:13px;">View 엔드포인트 (<code>/</code>)</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-gray">Service</span></td>
+                <td><code>TodoService</code></td>
+                <td style="font-size:13px;">비즈니스 로직 캡슐화</td>
+              </tr>
+              <tr>
+                <td><span class="badge badge-green">Repository</span></td>
+                <td><code>TodoRepository</code></td>
+                <td style="font-size:13px;">JdbcTemplate 기반 CRUD</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div>
+          <div class="card-title">패키지 구조</div>
+          <div class="code-block" style="font-size:12.5px; line-height:1.75;"><pre>
+<span class="cmt">com.example.todoList/</span>
+├── <span class="ann">TodoListApplication.java</span>
+├── <span class="ann">controller/</span>
+│   ├── <span class="cls">TodoController.java</span>      <span class="cmt">// REST API</span>
+│   └── <span class="cls">TodoViewController.java</span>  <span class="cmt">// View</span>
+├── <span class="ann">domain/</span>
+│   ├── <span class="cls">Todo.java</span>                <span class="cmt">// Entity</span>
+│   └── <span class="cls">Priority.java</span>           <span class="cmt">// Enum</span>
+├── <span class="ann">service/</span>
+│   └── <span class="cls">TodoService.java</span>
+└── <span class="ann">repository/</span>
+    └── <span class="cls">TodoRepository.java</span>
+</pre></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span class="footer-project">TodoList Backend</span>
+    <span class="footer-num">3 / 9</span>
+  </div>
+</div>
+
+
+<!-- ======================================
+     S4 · 도메인 모델
+====================================== -->
+<div class="slide" id="slide-3">
+  <div class="slide-inner">
+    <div class="side-bar"></div>
+    <div class="slide-body">
+      <div class="slide-header">
+        <div class="slide-category">Domain Model</div>
+        <div class="slide-title">도메인 모델 설계</div>
+        <div class="title-divider"></div>
+      </div>
+
+      <div class="grid-2" style="flex:1; align-items:start;">
+        <div class="flex-col gap-16">
+          <div>
+            <div class="card-title">Todo Entity 필드</div>
+            <table class="ppt-table">
+              <thead>
+                <tr><th>필드</th><th>타입</th><th>제약 / 기본값</th></tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>id</code></td>
+                  <td><span class="badge badge-gray">Long</span></td>
+                  <td><span class="badge badge-blue">AUTO_INCREMENT PK</span></td>
+                </tr>
+                <tr>
+                  <td><code>content</code></td>
+                  <td><span class="badge badge-gray">String</span></td>
+                  <td><span class="badge badge-red">NOT NULL</span></td>
+                </tr>
+                <tr>
+                  <td><code>completed</code></td>
+                  <td><span class="badge badge-gray">boolean</span></td>
+                  <td><span class="badge badge-green">DEFAULT false</span></td>
+                </tr>
+                <tr>
+                  <td><code>dueDate</code></td>
+                  <td><span class="badge badge-gray">LocalDate</span></td>
+                  <td><span class="badge badge-amber">NULLABLE</span></td>
+                </tr>
+                <tr>
+                  <td><code>priority</code></td>
+                  <td><span class="badge badge-gray">Priority</span></td>
+                  <td><span class="badge badge-green">DEFAULT MEDIUM</span></td>
+                </tr>
+                <tr>
+                  <td><code>createdAt</code></td>
+                  <td><span class="badge badge-gray">LocalDateTime</span></td>
+                  <td><span class="badge badge-green">AUTO TIMESTAMP</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card">
+            <div class="card-title">Priority Enum</div>
+            <div class="flex gap-8">
+              <span class="badge badge-red" style="font-size:13px; padding:4px 14px;">HIGH</span>
+              <span class="badge badge-amber" style="font-size:13px; padding:4px 14px;">MEDIUM</span>
+              <span class="badge badge-green" style="font-size:13px; padding:4px 14px;">LOW</span>
+            </div>
+            <p style="font-size:12px; color:var(--sub); margin-top:10px; line-height:1.5;">DB에는 VARCHAR(10)으로 저장. Enum.valueOf()로 변환.</p>
+          </div>
+        </div>
+        <div class="flex-col gap-16">
+          <div>
+            <div class="card-title">DDL Schema</div>
+            <div class="code-block" style="font-size:12.5px;">
+<span class="kw">CREATE TABLE</span> <span class="cls">todo</span> (
+  <span class="ann">id</span>         <span class="type">BIGINT</span> <span class="kw">AUTO_INCREMENT PRIMARY KEY</span>,
+  <span class="ann">content</span>    <span class="type">VARCHAR</span>(<span class="num">255</span>) <span class="kw">NOT NULL</span>,
+  <span class="ann">completed</span>  <span class="type">BOOLEAN</span> <span class="kw">DEFAULT</span> <span class="kw">FALSE</span>,
+  <span class="ann">due_date</span>   <span class="type">DATE</span>,
+  <span class="ann">priority</span>   <span class="type">VARCHAR</span>(<span class="num">10</span>) <span class="kw">NOT NULL DEFAULT</span> <span class="str">'MEDIUM'</span>,
+  <span class="ann">created_at</span> <span class="type">TIMESTAMP</span> <span class="kw">NOT NULL</span>
+             <span class="kw">DEFAULT</span> <span class="fn">CURRENT_TIMESTAMP</span>
+);
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">설계 포인트</div>
+            <div class="flex-col gap-8">
+              <p style="font-size:13px; color:var(--sub); line-height:1.5;">— ORM 미사용으로 SQL 동작을 명시적으로 파악 가능</p>
+              <p style="font-size:13px; color:var(--sub); line-height:1.5;">— <code>created_at</code> DB DEFAULT 설정으로 앱 의존도 제거</p>
+              <p style="font-size:13px; color:var(--sub); line-height:1.5;">— <code>due_date</code> NULL 허용으로 선택적 마감일 지원</p>
+              <p style="font-size:13px; color:var(--sub); line-height:1.5;">— Priority는 VARCHAR 저장 후 Enum 변환 처리</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span class="footer-project">TodoList Backend</span>
+    <span class="footer-num">4 / 9</span>
+  </div>
+</div>
+
+
+<!-- ======================================
+     S5 · REST API
+====================================== -->
+<div class="slide" id="slide-4">
+  <div class="slide-inner">
+    <div class="side-bar"></div>
+    <div class="slide-body">
+      <div class="slide-header">
+        <div class="slide-category">REST API</div>
+        <div class="slide-title">API 엔드포인트 설계</div>
+        <div class="title-divider"></div>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <table class="ppt-table">
+          <thead>
+            <tr>
+              <th style="width:80px;">Method</th>
+              <th style="width:230px;">Endpoint</th>
+              <th>파라미터 / 바디</th>
+              <th style="width:150px;">응답</th>
+              <th>설명</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="method get">GET</span></td>
+              <td><code>/api/todos</code></td>
+              <td style="font-size:13px;"><code>?status</code> <code>?query</code> <code>?sort</code></td>
+              <td><span class="badge badge-green">List&lt;Todo&gt;</span></td>
+              <td style="font-size:13px;">전체 조회 · 필터 · 검색 · 정렬</td>
+            </tr>
+            <tr>
+              <td><span class="method post">POST</span></td>
+              <td><code>/api/todos</code></td>
+              <td style="font-size:13px;">Body: <code>Todo</code></td>
+              <td><span class="badge badge-blue">Todo</span></td>
+              <td style="font-size:13px;">새 할 일 생성</td>
+            </tr>
+            <tr>
+              <td><span class="method put">PUT</span></td>
+              <td><code>/api/todos/{id}</code></td>
+              <td style="font-size:13px;">Path: <code>id</code>, Body: <code>Todo</code></td>
+              <td><span class="badge badge-blue">Todo</span></td>
+              <td style="font-size:13px;">특정 할 일 수정</td>
+            </tr>
+            <tr>
+              <td><span class="method delete">DELETE</span></td>
+              <td><code>/api/todos/{id}</code></td>
+              <td style="font-size:13px;">Path: <code>id</code></td>
+              <td><span class="badge badge-gray">204 No Content</span></td>
+              <td style="font-size:13px;">단건 삭제</td>
+            </tr>
+            <tr>
+              <td><span class="method delete">DELETE</span></td>
+              <td><code>/api/todos/completed</code></td>
+              <td style="font-size:13px;">—</td>
+              <td><span class="badge badge-amber">deletedCount</span></td>
+              <td style="font-size:13px;">완료 항목 일괄 삭제</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-title">GET /api/todos 쿼리 파라미터</div>
+          <div class="flex-col gap-12">
+            <div class="flex items-center gap-12">
+              <code style="min-width:60px;">status</code>
+              <span style="font-size:13px; color:var(--sub);">ALL · ACTIVE · COMPLETED <span style="color:var(--text);">(기본값: ALL)</span></span>
+            </div>
+            <div class="flex items-center gap-12">
+              <code style="min-width:60px;">query</code>
+              <span style="font-size:13px; color:var(--sub);">content 키워드 검색. 대소문자 무관 LIKE 처리</span>
+            </div>
+            <div class="flex items-center gap-12">
+              <code style="min-width:60px;">sort</code>
+              <span style="font-size:13px; color:var(--sub);">LATEST (최신순) · DUE_ASC (마감일순, NULL은 후순위) <span style="color:var(--text);">(기본값: LATEST)</span></span>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">응답 JSON 예시</div>
+          <div class="code-block" style="font-size:12.5px; line-height:1.6;">
+{
+  <span class="str">"id"</span>: <span class="num">1</span>,
+  <span class="str">"content"</span>: <span class="str">"Spring Boot 공부하기"</span>,
+  <span class="str">"completed"</span>: <span class="kw">false</span>,
+  <span class="str">"dueDate"</span>: <span class="str">"2026-03-31"</span>,
+  <span class="str">"priority"</span>: <span class="str">"HIGH"</span>,
+  <span class="str">"createdAt"</span>: <span class="str">"2026-03-27T10:00:00"</span>
+}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span class="footer-project">TodoList Backend</span>
+    <span class="footer-num">5 / 9</span>
+  </div>
+</div>
+
+
+<!-- ======================================
+     S6 · Repository 핵심 코드
+====================================== -->
+<div class="slide" id="slide-5">
+  <div class="slide-inner">
+    <div class="side-bar"></div>
+    <div class="slide-body">
+      <div class="slide-header">
+        <div class="slide-category">Core Code</div>
+        <div class="slide-title">Repository 핵심 구현</div>
+        <div class="title-divider"></div>
+      </div>
+
+      <div class="grid-2" style="flex:1; align-items:start;">
+        <div class="flex-col gap-16">
+          <div>
+            <div class="card-title">동적 SQL 빌더 — findAll()</div>
+            <div class="code-block" style="font-size:12px; line-height:1.65;">
+<span class="type">StringBuilder</span> sql <span class="op">=</span> <span class="kw">new</span> <span class="cls">StringBuilder</span>(
+    <span class="str">"SELECT * FROM todo WHERE 1=1"</span>);
+
+<span class="cmt">// 상태 필터</span>
+<span class="kw">if</span> (<span class="str">"ACTIVE"</span>.equals(status))
+    sql.append(<span class="str">" AND completed = FALSE"</span>);
+<span class="kw">else if</span> (<span class="str">"COMPLETED"</span>.equals(status))
+    sql.append(<span class="str">" AND completed = TRUE"</span>);
+
+<span class="cmt">// 키워드 검색</span>
+<span class="kw">if</span> (query != <span class="kw">null</span> && !query.isBlank())
+    sql.append(<span class="str">" AND LOWER(content) LIKE ?"</span>);
+
+<span class="cmt">// 정렬</span>
+<span class="kw">if</span> (<span class="str">"DUE_ASC"</span>.equals(sort))
+    sql.append(<span class="str">" ORDER BY due_date ASC NULLS LAST"</span>);
+<span class="kw">else</span>
+    sql.append(<span class="str">" ORDER BY created_at DESC"</span>);
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">구현 포인트</div>
+            <div class="flex-col gap-8">
+              <p style="font-size:13px; color:var(--sub);">— <code>WHERE 1=1</code> 패턴으로 조건을 동적으로 추가</p>
+              <p style="font-size:13px; color:var(--sub);">— <code>LOWER()</code>로 대소문자 무관 검색 구현</p>
+              <p style="font-size:13px; color:var(--sub);">— <code>NULLS LAST</code>로 마감일 없는 항목 후순위 정렬</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex-col gap-16">
+          <div>
+            <div class="card-title">RowMapper 구현</div>
+            <div class="code-block" style="font-size:12px; line-height:1.65;">
+<span class="kw">private final</span> <span class="type">RowMapper</span>&lt;<span class="cls">Todo</span>&gt; todoRowMapper
+    = (rs, rowNum) -> {
+  <span class="type">Long</span> id = rs.getLong(<span class="str">"id"</span>);
+  <span class="type">String</span> content = rs.getString(<span class="str">"content"</span>);
+  <span class="kw">boolean</span> completed = rs.getBoolean(<span class="str">"completed"</span>);
+  <span class="type">LocalDate</span> due =
+      rs.getObject(<span class="str">"due_date"</span>, <span class="cls">LocalDate</span>.class);
+  <span class="type">Priority</span> p =
+      <span class="cls">Priority</span>.valueOf(rs.getString(<span class="str">"priority"</span>));
+  <span class="type">LocalDateTime</span> ca =
+      rs.getObject(<span class="str">"created_at"</span>, <span class="cls">LocalDateTime</span>.class);
+  <span class="kw">return new</span> <span class="cls">Todo</span>(id, content, completed, due, p, ca);
+};
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">Repository 메서드</div>
+            <div class="flex-col gap-8">
+              <div class="flex items-center gap-8"><span class="badge badge-green">addTodo()</span><span style="font-size:13px; color:var(--sub);">INSERT + KeyHolder로 생성 ID 반환</span></div>
+              <div class="flex items-center gap-8"><span class="badge badge-blue">findById()</span><span style="font-size:13px; color:var(--sub);">단건 조회</span></div>
+              <div class="flex items-center gap-8"><span class="badge badge-blue">findAll()</span><span style="font-size:13px; color:var(--sub);">동적 필터·정렬 다건 조회</span></div>
+              <div class="flex items-center gap-8"><span class="badge badge-amber">updateTodo()</span><span style="font-size:13px; color:var(--sub);">전체 필드 UPDATE</span></div>
+              <div class="flex items-center gap-8"><span class="badge badge-red">deleteTodo()</span><span style="font-size:13px; color:var(--sub);">단건 삭제</span></div>
+              <div class="flex items-center gap-8"><span class="badge badge-red">deleteCompleted()</span><span style="font-size:13px; color:var(--sub);">완료 항목 일괄 삭제, 건수 반환</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span class="footer-project">TodoList Backend</span>
+    <span class="footer-num">6 / 9</span>
+  </div>
+</div>
+
+
+<!-- ======================================
+     S7 · 주요 기능
+====================================== -->
+<div class="slide" id="slide-6">
+  <div class="slide-inner">
+    <div class="side-bar"></div>
+    <div class="slide-body">
+      <div class="slide-header">
+        <div class="slide-category">Features</div>
+        <div class="slide-title">주요 기능 구현</div>
+        <div class="title-divider"></div>
+      </div>
+
+      <div class="grid-2">
+        <div>
+          <div class="feat-row">
+            <div class="feat-dot"></div>
+            <div>
+              <div class="feat-title">CRUD 전체 구현</div>
+              <div class="feat-desc">생성 · 조회 · 수정 · 삭제 완전 지원. PUT 요청으로 content, dueDate, priority, completed를 한 번에 업데이트</div>
+            </div>
+          </div>
+          <div class="feat-row">
+            <div class="feat-dot"></div>
+            <div>
+              <div class="feat-title">검색 · 필터 · 정렬</div>
+              <div class="feat-desc">상태 필터(ALL/ACTIVE/COMPLETED), 키워드 검색, 최신순/마감일순 정렬을 단일 GET API에서 조합 처리</div>
+            </div>
+          </div>
+          <div class="feat-row">
+            <div class="feat-dot"></div>
+            <div>
+              <div class="feat-title">우선순위 관리</div>
+              <div class="feat-desc">HIGH / MEDIUM / LOW 3단계로 업무 중요도를 분류. DB는 VARCHAR 저장, Java는 Enum으로 처리</div>
+            </div>
+          </div>
+          <div class="feat-row">
+            <div class="feat-dot"></div>
+            <div>
+              <div class="feat-title">완료 항목 일괄 삭제</div>
+              <div class="feat-desc">완료된 할 일을 한 번에 삭제하는 벌크 DELETE API. 삭제된 건수를 응답으로 반환</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="feat-row">
+            <div class="feat-dot"></div>
+            <div>
+              <div class="feat-title">마감일 추적</div>
+              <div class="feat-desc">LocalDate 타입으로 선택적 마감일 설정 가능. DUE_ASC 정렬 시 마감일 없는 항목은 NULLS LAST 처리</div>
+            </div>
+          </div>
+          <div class="feat-row">
+            <div class="feat-dot"></div>
+            <div>
+              <div class="feat-title">REST + MVC 컨트롤러 분리</div>
+              <div class="feat-desc">API 전용 TodoController와 View 전용 TodoViewController를 분리해 역할 명확화 및 유지보수성 향상</div>
+            </div>
+          </div>
+          <div class="feat-row">
+            <div class="feat-dot"></div>
+            <div>
+              <div class="feat-title">프론트엔드 연동</div>
+              <div class="feat-desc">Vanilla JS Fetch API로 REST 호출. 디바운스 검색(300ms), XSS 방어용 HTML 이스케이프 적용</div>
+            </div>
+          </div>
+          <div class="feat-row">
+            <div class="feat-dot"></div>
+            <div>
+              <div class="feat-title">H2 Console</div>
+              <div class="feat-desc">/h2-console에서 실시간으로 DB 상태 확인 가능. 개발·디버깅 생산성 향상</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span class="footer-project">TodoList Backend</span>
+    <span class="footer-num">7 / 9</span>
+  </div>
+</div>
+
+
+<!-- ======================================
+     S8 · 프론트엔드
+====================================== -->
+<div class="slide" id="slide-7">
+  <div class="slide-inner">
+    <div class="side-bar"></div>
+    <div class="slide-body">
+      <div class="slide-header">
+        <div class="slide-category">Frontend</div>
+        <div class="slide-title">프론트엔드 구현</div>
+        <div class="title-divider"></div>
+      </div>
+
+      <div class="grid-2" style="flex:1; align-items:start;">
+        <div class="flex-col gap-16">
+          <div class="card">
+            <div class="card-title">UI 구성 요소</div>
+            <table class="ppt-table">
+              <tbody>
+                <tr>
+                  <td><span class="badge badge-blue">Summary Cards</span></td>
+                  <td style="font-size:13px;">전체 · 진행중 · 완료 개수 요약 표시</td>
+                </tr>
+                <tr>
+                  <td><span class="badge badge-blue">Todo Form</span></td>
+                  <td style="font-size:13px;">내용 · 마감일 · 우선순위 입력 폼</td>
+                </tr>
+                <tr>
+                  <td><span class="badge badge-blue">Filter Toolbar</span></td>
+                  <td style="font-size:13px;">상태 필터 + 검색창 + 정렬 + 일괄삭제</td>
+                </tr>
+                <tr>
+                  <td><span class="badge badge-blue">Todo Table</span></td>
+                  <td style="font-size:13px;">체크박스 · 내용 · 마감일 · 우선순위 · 삭제</td>
+                </tr>
+                <tr>
+                  <td><span class="badge badge-gray">Modal / Toast</span></td>
+                  <td style="font-size:13px;">삭제 확인 모달, 작업 결과 알림</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card">
+            <div class="card-title">CSS 설계</div>
+            <div class="flex-col gap-8">
+              <p style="font-size:13px; color:var(--sub);">— CSS Custom Properties로 색상 중앙 관리</p>
+              <p style="font-size:13px; color:var(--sub);">— Grid 레이아웃으로 폼·툴바 다단 배치</p>
+              <p style="font-size:13px; color:var(--sub);">— 768px 미디어쿼리 모바일 반응형</p>
+              <p style="font-size:13px; color:var(--sub);">— Priority 배지 색상 분류 (빨강 / 주황 / 초록)</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex-col gap-16">
+          <div>
+            <div class="card-title">JavaScript 핵심 구현</div>
+            <div class="code-block" style="font-size:12px; line-height:1.65;">
+<span class="cmt">// 상태 관리</span>
+<span class="kw">const</span> state = {
+  status: <span class="str">"ALL"</span>,
+  query:  <span class="str">""</span>,
+  sort:   <span class="str">"LATEST"</span>,
+  todos:  []
+};
+
+<span class="cmt">// 디바운스 검색 (300ms)</span>
+searchInput.addEventListener(<span class="str">'input'</span>,
+  debounce(() => {
+    state.query = searchInput.value;
+    fetchTodos();
+  }, <span class="num">300</span>)
+);
+
+<span class="cmt">// XSS 방어 — 사용자 입력 이스케이프</span>
+<span class="kw">function</span> <span class="fn">escapeHtml</span>(v) {
+  <span class="kw">return</span> v.replace(<span class="str">/&amp;/g</span>, <span class="str">'&amp;amp;'</span>)
+           .replace(<span class="str">/&lt;/g</span>, <span class="str">'&amp;lt;'</span>)
+           .replace(<span class="str">/&gt;/g</span>, <span class="str">'&amp;gt;'</span>);
+}
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-title">기술 포인트</div>
+            <div class="flex-col gap-8">
+              <p style="font-size:13px; color:var(--sub);">— Fetch API 래퍼로 에러 처리 일원화</p>
+              <p style="font-size:13px; color:var(--sub);">— Optimistic UI 업데이트 + 실패 시 롤백</p>
+              <p style="font-size:13px; color:var(--sub);">— Nanum Gothic 폰트로 가독성 최적화</p>
+              <p style="font-size:13px; color:var(--sub);">— 토스트 알림으로 작업 결과 즉시 피드백</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span class="footer-project">TodoList Backend</span>
+    <span class="footer-num">8 / 9</span>
+  </div>
+</div>
+
+
+<!-- ======================================
+     S9 · 마무리
+====================================== -->
+<div class="slide" id="slide-8">
+  <div class="slide-inner">
+    <div class="side-bar"></div>
+    <div class="slide-body">
+      <div class="slide-header">
+        <div class="slide-category">Summary</div>
+        <div class="slide-title">프로젝트 정리</div>
+        <div class="title-divider"></div>
+      </div>
+
+      <div class="grid-3" style="margin-bottom:20px;">
+        <div class="card">
+          <div class="card-title">계층형 아키텍처</div>
+          <p style="font-size:13px; color:var(--sub); line-height:1.6;">Controller → Service → Repository 레이어 분리로 관심사 분리 및 유지보수성을 확보했습니다.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">RESTful API 설계</div>
+          <p style="font-size:13px; color:var(--sub); line-height:1.6;">HTTP 메서드 의미에 맞는 5개 엔드포인트를 설계했습니다. 필터·검색·정렬을 단일 GET API에서 조합합니다.</p>
+        </div>
+        <div class="card">
+          <div class="card-title">직접 SQL 제어</div>
+          <p style="font-size:13px; color:var(--sub); line-height:1.6;">JdbcTemplate + RowMapper로 ORM 없이 SQL을 직접 작성해 DB 동작 원리를 명확하게 이해했습니다.</p>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-bottom:20px;">
+        <div class="card">
+          <div class="card-title">배운 점</div>
+          <div class="flex-col gap-8" style="margin-top:4px;">
+            <p style="font-size:13px; color:var(--sub);">— Spring MVC 요청 흐름 (DispatcherServlet → Controller → View)</p>
+            <p style="font-size:13px; color:var(--sub);">— JdbcTemplate 동적 쿼리 빌딩 패턴</p>
+            <p style="font-size:13px; color:var(--sub);">— REST API 설계 원칙과 HTTP 메서드 활용</p>
+            <p style="font-size:13px; color:var(--sub);">— Thymeleaf + Vanilla JS 연동 방식</p>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title">개선 가능 포인트</div>
+          <div class="flex-col gap-8" style="margin-top:4px;">
+            <p style="font-size:13px; color:var(--sub);">— JPA / Hibernate 도입으로 반복 코드 감소</p>
+            <p style="font-size:13px; color:var(--sub);">— @ControllerAdvice로 예외 처리 고도화</p>
+            <p style="font-size:13px; color:var(--sub);">— 단위 테스트 커버리지 확대 (MockMvc 등)</p>
+            <p style="font-size:13px; color:var(--sub);">— PostgreSQL 등 실 DB 연동</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:14px 20px;">
+        <div class="card-title" style="margin-bottom:8px;">사용 기술</div>
+        <div class="flex gap-8" style="flex-wrap:wrap;">
+          <span class="badge badge-blue">Spring Boot 3.5.4</span>
+          <span class="badge badge-gray">Java 21</span>
+          <span class="badge badge-green">H2 Database</span>
+          <span class="badge badge-amber">Thymeleaf</span>
+          <span class="badge badge-gray">JdbcTemplate</span>
+          <span class="badge badge-blue">REST API</span>
+          <span class="badge badge-gray">Layered Architecture</span>
+          <span class="badge badge-gray">Vanilla JS</span>
+          <span class="badge badge-gray">Gradle</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer">
+    <span class="footer-project">TodoList Backend</span>
+    <span class="footer-num">9 / 9</span>
+  </div>
+</div>
+
+
+</div><!-- /stage -->
+</div><!-- /app -->
+
+<div id="nav">
+  <button onclick="goPrev()">&#8592;</button>
+  <span id="slide-counter">1 / 9</span>
+  <button onclick="goNext()">&#8594;</button>
+</div>
+
+<div id="dots"></div>
+
+<script>
+  const TOTAL = 9;
+  let cur = 0;
+  const slides = document.querySelectorAll('.slide');
+  const counter = document.getElementById('slide-counter');
+  const dotsEl = document.getElementById('dots');
+
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot-nav' + (i === 0 ? ' active' : '');
+    d.addEventListener('click', () => goTo(i));
+    dotsEl.appendChild(d);
+  }
+
+  function goTo(n) {
+    slides[cur].classList.remove('active');
+    dotsEl.children[cur].classList.remove('active');
+    cur = (n + TOTAL) % TOTAL;
+    slides[cur].classList.add('active');
+    dotsEl.children[cur].classList.add('active');
+    counter.textContent = `${cur + 1} / ${TOTAL}`;
+  }
+
+  function goNext() { goTo(cur + 1); }
+  function goPrev() { goTo(cur - 1); }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goNext(); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); goPrev(); }
+  });
+
+  let tx = null;
+  document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; });
+  document.addEventListener('touchend', e => {
+    if (tx === null) return;
+    const dx = e.changedTouches[0].clientX - tx;
+    if (Math.abs(dx) > 50) dx < 0 ? goNext() : goPrev();
+    tx = null;
+  });
+</script>
+</body>
+</html>

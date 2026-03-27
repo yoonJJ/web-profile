@@ -1,0 +1,21 @@
+:root {
+    --brand: #5b6880;
+    --brand-hover: #4b566b;
+    --brand-soft: #dde2eb;
+    --brand-mist: #eff2f7;
+    --brand-muted: #7a879d;
+
+    --accent: #d9dee8;
+    --accent-hover: #c9d0dd;
+    --accent-soft: #f4f6fa;
+    --accent-text: #556176;
+    --accent-strong: #313948;
+
+    --text-body: #505868;
+    --text-heading: #2b3340;
+}
+
+/* ----- Basic Reset ----- */
+* {margin: 0; padding: 0; box-sizing: border-box;}
+
+body {font-family: 'Noto Sans KR', sans-serif; line-height: 1.6; background-color: #fff; overflow-x: hidden;}
