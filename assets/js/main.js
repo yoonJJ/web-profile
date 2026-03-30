@@ -1,17 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // 페이지 로드 시 상단으로 강제 이동
-    window.scrollTo(0, 0);
-    
-    // 추가 보장을 위해 약간의 지연 후 다시 한번 실행
-    setTimeout(() => {
-        window.scrollTo(0, 0);
-    }, 100);
-    
-    // 페이지 로드 완료 후에도 한번 더 실행
-    window.addEventListener('load', function() {
-        window.scrollTo(0, 0);
-    });
-    
     const links = document.querySelectorAll('a[href^="#"]');
     
     links.forEach(link => {
