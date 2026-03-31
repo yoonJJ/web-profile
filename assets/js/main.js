@@ -151,6 +151,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const readMoreBtn = document.querySelector('.read-more');
     const closeBtn = document.querySelector('.close');
     const closePortfolioBtn = document.querySelector('.close-portfolio');
+    const portfolioModalTitle = document.getElementById('portfolioModalTitle');
     const portfolioModalButtons = document.querySelectorAll('.open-portfolio-modal');
     const modalAnimationMs = 220;
     let previousFocusedElement = null;
@@ -176,12 +177,15 @@ document.addEventListener('DOMContentLoaded', function() {
         }, modalAnimationMs);
     }
 
-    function openPortfolioModal(src) {
+    function openPortfolioModal(src, title) {
         if (!portfolioModal || !portfolioFrame) return;
         previousFocusedElement = document.activeElement;
         portfolioModal.classList.remove('is-closing');
         portfolioModal.classList.add('is-open');
         portfolioFrame.src = src;
+        if (portfolioModalTitle && title) {
+            portfolioModalTitle.textContent = title;
+        }
         document.body.style.overflow = 'hidden';
         closePortfolioBtn?.focus();
     }
@@ -221,7 +225,8 @@ document.addEventListener('DOMContentLoaded', function() {
         button.addEventListener('click', function() {
             const src = this.getAttribute('data-src');
             if (!src) return;
-            openPortfolioModal(src);
+            const title = this.getAttribute('data-title');
+            openPortfolioModal(src, title);
         });
     });
     
