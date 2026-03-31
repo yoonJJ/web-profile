@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IT 자격증 AI 학습 플랫폼 · Portfolio</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --accent: #2563eb; --accent-light: #eff6ff;
+      --text: #111827; --sub: #6b7280;
+      --border: #e5e7eb; --bg: #f9fafb;
+      --white: #ffffff;
+      --slide-w: 1280px; --slide-h: 720px;
+    }
+    html, body { font-family: 'Noto Sans KR', sans-serif; background: #dde1e7; height: 100%; overflow: hidden; color: var(--text); }
+    #app { width: 100vw; height: 100vh; display: flex; align-items: center; justify-content: center; }
+    #stage { width: var(--slide-w); height: var(--slide-h); position: relative; box-shadow: 0 8px 40px rgba(0,0,0,.18); }
+    .slide { position: absolute; inset: 0; display: flex; flex-direction: column; background: var(--white); opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+    .slide.active { opacity: 1; pointer-events: all; }
+    .slide-inner { flex: 1; display: flex; min-height: 0; overflow: hidden; }
+    .side-bar { width: 6px; background: var(--accent); flex-shrink: 0; }
+    .slide-body { flex: 1; padding: 40px 52px 30px; display: flex; flex-direction: column; gap: 11px; overflow: hidden; }
+    .slide-category { font-size: 11px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+    .slide-title { font-size: 27px; font-weight: 700; line-height: 1.2; }
+    .slide-desc { font-size: 13px; line-height: 1.7; color: var(--sub); }
+    .title-divider { width: 40px; height: 3px; background: var(--accent); }
+    .slide-footer { height: 36px; background: var(--bg); border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px 0 24px; color: var(--sub); font-size: 11px; flex-shrink: 0; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 13px 15px; }
+    .card-title { font-size: 10.5px; font-weight: 700; color: var(--sub); text-transform: uppercase; letter-spacing: .08em; margin-bottom: 7px; }
+    .chip { display: inline-block; border: 1px solid #bfdbfe; background: var(--accent-light); color: var(--accent); border-radius: 999px; padding: 3px 10px; font-size: 12px; margin-right: 5px; margin-bottom: 4px; }
+    ul.fl { padding-left: 15px; color: var(--sub); font-size: 12.5px; line-height: 1.9; }
+    ul.fl li::marker { color: var(--accent); }
+    /* Code */
+    .cb { background: #0f172a; border-radius: 8px; padding: 11px 13px; overflow: hidden; }
+    .cb pre { font-family: 'JetBrains Mono', monospace; font-size: 10.5px; line-height: 1.6; color: #e2e8f0; white-space: pre; overflow: hidden; }
+    .kw { color: #93c5fd; } .fn { color: #6ee7b7; } .str { color: #fde68a; }
+    .cm { color: #64748b; font-style: italic; } .nm { color: #fca5a5; } .op { color: #94a3b8; }
+    .ty { color: #f9a8d4; }
+    /* Stack icons */
+    .icon-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .icon-item { display: flex; flex-direction: column; align-items: center; gap: 3px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 7px 10px; min-width: 62px; }
+    .icon-item img { width: 28px; height: 28px; object-fit: contain; }
+    .icon-item span { font-size: 9px; color: var(--sub); font-weight: 600; white-space: nowrap; }
+    /* Flow */
+    .frow { display: flex; align-items: center; gap: 4px; flex-wrap: nowrap; }
+    .fb { border-radius: 5px; padding: 5px 11px; font-size: 11.5px; font-weight: 600; white-space: nowrap; line-height: 1.3; }
+    .fb-bl { background: #f8f9fa; border: 1.5px solid #d1d5db; color: #374151; }
+    .fb-gr { background: #f8f9fa; border: 1.5px solid #d1d5db; color: #374151; }
+    .fb-pu { background: #f8f9fa; border: 1.5px solid #d1d5db; color: #374151; }
+    .fb-or { background: #f8f9fa; border: 1.5px solid #d1d5db; color: #374151; }
+    .fb-dk { background: #f1f3f5; border: 1.5px solid #9ca3af; color: #6b7280; }
+    .farr { font-size: 12px; color: #9ca3af; }
+    /* Screenshot */
+    .ss { border-radius: 8px; border: 1px solid var(--border); width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+    /* Split */
+    .split { display: flex; gap: 20px; flex: 1; min-height: 0; }
+    .spl { flex: 1; display: flex; flex-direction: column; gap: 10px; min-width: 0; overflow: hidden; }
+    .spr { width: 410px; flex-shrink: 0; overflow: hidden; }
+    /* Badge */
+    .badge { display: inline-block; border-radius: 3px; padding: 1px 6px; font-size: 9.5px; font-weight: 700; margin-left: 5px; vertical-align: middle; }
+    .b-bl { background: #dbeafe; color: #1d4ed8; }
+    .b-gr { background: #d1fae5; color: #065f46; }
+    .b-pu { background: #ede9fe; color: #5b21b6; }
+    /* Schema */
+    .sbox { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 10px 12px; }
+    .sname { font-size: 13.5px; font-weight: 700; color: var(--accent); margin-bottom: 7px; }
+    .sfield { font-family: 'JetBrains Mono', monospace; font-size: 11.5px; color: var(--sub); line-height: 1.75; }
+    .sk { color: var(--text); font-weight: 600; }
+    .st { color: #7c3aed; }
+    /* Metric */
+    .mnum { font-size: 36px; font-weight: 700; color: var(--accent); line-height: 1; }
+    .mlbl { font-size: 11px; color: var(--sub); margin-top: 3px; }
+    /* Nav */
+    #nav { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 12px; background: var(--white); border: 1px solid var(--border); border-radius: 999px; padding: 7px 18px; box-shadow: 0 2px 12px rgba(0,0,0,.1); }
+    #nav button { background: none; border: none; cursor: pointer; font-size: 16px; color: var(--sub); padding: 2px 6px; }
+    #slide-counter { min-width: 60px; text-align: center; font-size: 12px; color: var(--sub); }
+    body.is-embedded #app { align-items: center; justify-content: center; padding: 8px; overflow: hidden; }
+    body.is-embedded #stage { transform-origin: center center; }
+  </style>
+</head>
+<body>
+<div id="app">
+<div id="stage">
+
+<!-- ====== S1: 표지 ====== -->
+<section class="slide active">
+  <div class="slide-inner">
+    <div class="side-bar"></div>
+    <!-- row layout override -->
+    <div style="flex:1; display:flex; overflow:hidden;">
+      <!-- Left -->
+      <div style="flex:1; padding:58px 50px 36px; display:flex; flex-direction:column; gap:15px; justify-content:center;">
+        <div class="slide-category">Full-Stack Portfolio · AI Project</div>
+        <h1 style="font-size:38px; font-weight:700; line-height:1.2;">
+          IT 자격증 AI 학습 플랫폼<br>
+          <span style="color:var(--accent);">RAG + Local LLM 기반 문제 생성</span>
+        </h1>
+        <div class="title-divider"></div>
+        <p class="slide-desc" style="max-width:520px; font-size:14px;">
+          PDF 학습 자료를 업로드하면 AI가 자격증 스타일 문제를 자동 생성합니다.<br>
+          퀴즈·시험 시뮬레이션·오답노트·실시간 AI 튜터를 제공하는<br>
+          <strong>로컬 LLM 기반 풀스택 학습 플랫폼</strong>입니다.
+        </p>
+        <div style="margin-top:4px;">
+          <span class="chip">React + Vite</span>
+          <span class="chip">Node.js / Express</span>
+          <span class="chip">PostgreSQL + pgvector</span>
+          <span class="chip">Ollama (gpt-oss:20b)</span>
+          <span class="chip">Prisma ORM</span>
+          <span class="chip">Docker</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>IT 자격증 AI 학습 플랫폼</span><span>1 / 10</span></div>
+</section>
+
+<!-- ====== S2: 기술 스택 ====== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="side-bar"></div>
+    <div class="slide-body">
+      <div class="slide-category">Tech Stack</div>
+      <h2 class="slide-title">사용 기술 스택</h2>
+      <div class="title-divider"></div>
+      <div style="display:grid; grid-template-columns:repeat(7,1fr); gap:10px; margin-top:8px;">
+        <div class="icon-item"><img src="../../assets/images/about/about_img_18.svg" style="width:42px;height:42px;" /><span>React</span></div>
+        <div class="icon-item"><img src="../../assets/images/about/about_img_22.svg" style="width:42px;height:42px;" /><span>Vite</span></div>
+        <div class="icon-item"><img src="../../assets/images/about/about_img_19.svg" style="width:42px;height:42px;" /><span>React Router</span></div>
+        <div class="icon-item"><img src="../../assets/images/about/about_img_21.svg" style="width:42px;height:42px;" /><span>Tailwind CSS</span></div>
+        <div class="icon-item"><img src="../../assets/images/about/about_img_15.svg" style="width:42px;height:42px;" /><span>Node.js</span></div>
+        <div class="icon-item"><img src="../../assets/images/about/about_img_12.svg" style="width:42px;height:42px;" /><span>Express</span></div>
+        <div class="icon-item"><img src="../../assets/images/about/about_img_14.svg" style="width:42px;height:42px;" /><span>Prisma</span></div>
+        <div class="icon-item"><img src="../../assets/images/about/about_img_17.svg" style="width:42px;height:42px;" /><span>PostgreSQL</span></div>
+        <div class="icon-item"><img src="../../assets/images/about/about_img_13.svg" style="width:42px;height:42px;" /><span>pgvector</span></div>
+        <div class="icon-item"><img src="../../assets/images/about/about_img_20.svg" style="width:42px;height:42px;" /><span>Redis</span></div>
+        <div class="icon-item"><img src="../../assets/images/about/about_img_16.svg" style="width:42px;height:42px;" /><span>Ollama</span></div>
+        <div class="icon-item"><img src="../../assets/images/about/about_img_10.svg" style="width:42px;height:42px;" /><span>gpt-oss:20b</span></div>
+        <div class="icon-item"><img src="../../assets/images/about/about_img_11.svg" style="width:42px;height:42px;" /><span>Docker</span></div>
+      </div>
+      <div class="grid-3" style="margin-top:10px; margin-bottom:0;">
+        <div class="card">
+          <div class="card-title">Frontend</div>
+          <ul class="fl">
+            <li><strong>React</strong> — 컴포넌트 기반 SPA</li>
+            <li><strong>Vite</strong> — HMR 빌드 + dev proxy</li>
+            <li><strong>React Router</strong> — 클라이언트 라우팅</li>
+            <li><strong>Tailwind CSS</strong> — 유틸리티 스타일링</li>
+            <li><strong>React Markdown</strong> — AI 응답 렌더링</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title">Backend</div>
+          <ul class="fl">
+            <li><strong>Node.js (ESM)</strong> — JS 런타임</li>
+            <li><strong>Express</strong> — REST API + SSE</li>
+            <li><strong>Prisma ORM</strong> — 타입 안전 DB 접근</li>
+            <li><strong>Multer</strong> — PDF 파일 업로드</li>
+            <li><strong>pdf-parse</strong> — 텍스트 추출</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title">AI / Infra</div>
+          <ul class="fl">
+            <li><strong>Ollama</strong> — 로컬 LLM 실행기</li>
+            <li><strong>gpt-oss:20b</strong> — 문제 생성 모델</li>
+            <li><strong>nomic-embed-text</strong> — 768d 임베딩</li>
+            <li><strong>pgvector</strong> — 코사인 유사도 검색</li>
+            <li><strong>Docker Compose</strong> — PG + Redis 인프라</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>IT 자격증 AI 학습 플랫폼</span><span>2 / 10</span></div>
+</section>
+
+<!-- ====== S3: 시스템 아키텍처 ====== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="side-bar"></div>
+    <div class="slide-body">
+      <div class="slide-category">Architecture</div>
+      <h2 class="slide-title">시스템 아키텍처</h2>
+      <div class="title-divider"></div>
+      <div class="card" style="padding:20px 24px;">
+        <div class="card-title">전체 요청 흐름 (Request Flow)</div>
+        <div class="frow" style="margin-top:10px; gap:8px;">
+          <div class="fb fb-bl" style="font-size:14px; padding:14px 22px;">React SPA<br><small style="font-weight:400;font-size:11px;">Dashboard / Quiz / Exam<br>WrongNote / VectorDebug</small></div>
+          <div class="farr" style="font-size:18px;">→</div>
+          <div class="fb fb-gr" style="font-size:14px; padding:14px 22px;">Express REST API<br><small style="font-weight:400;font-size:11px;">:3001 | CORS | Multer<br>/upload /questions /exam /tutor</small></div>
+          <div class="farr" style="font-size:18px;">→</div>
+          <div class="fb fb-pu" style="font-size:14px; padding:14px 22px;">Services Layer<br><small style="font-weight:400;font-size:11px;">rag.js · llm.js · chunker.js</small></div>
+          <div class="farr" style="font-size:18px;">→</div>
+          <div class="fb fb-or" style="font-size:14px; padding:14px 22px;">Ollama<br><small style="font-weight:400;font-size:11px;">gpt-oss:20b<br>nomic-embed-text</small></div>
+          <div class="farr" style="font-size:18px;">→</div>
+          <div class="fb fb-dk" style="font-size:14px; padding:14px 22px;">PostgreSQL<br><small style="font-weight:400;font-size:11px;">pgvector ext<br>768d vectors</small></div>
+        </div>
+      </div>
+      <div class="grid-3" style="margin-top:10px; margin-bottom:0;">
+        <div class="card">
+          <div class="card-title" style="color:#1d4ed8;">Client Layer</div>
+          <ul class="fl">
+            <li>React SPA + Vite dev proxy (:5173 → :3001)</li>
+            <li>6개 페이지 / 5개 공통 컴포넌트</li>
+            <li>useExam hook 상태 관리</li>
+            <li>EventSource API로 SSE 수신</li>
+            <li>WeaknessChart 취약 토픽 시각화</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color:#047857;">API Layer</div>
+          <ul class="fl">
+            <li><code style="font-size:10.5px;background:#f3f4f6;padding:1px 4px;border-radius:3px;">POST /api/upload</code> — PDF 임베딩</li>
+            <li><code style="font-size:10.5px;background:#f3f4f6;padding:1px 4px;border-radius:3px;">POST /api/questions/generate</code></li>
+            <li><code style="font-size:10.5px;background:#f3f4f6;padding:1px 4px;border-radius:3px;">POST /api/exam/grade</code></li>
+            <li><code style="font-size:10.5px;background:#f3f4f6;padding:1px 4px;border-radius:3px;">GET /api/tutor</code> (SSE stream)</li>
+            <li><code style="font-size:10.5px;background:#f3f4f6;padding:1px 4px;border-radius:3px;">GET /api/health</code> DB+LLM 상태</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title" style="color:#7c3aed;">Data Layer</div>
+          <ul class="fl">
+            <li>PostgreSQL 16 + pgvector extension</li>
+            <li><code style="font-size:10.5px;background:#f3f4f6;padding:1px 4px;border-radius:3px;">embedding &lt;=&gt; $1::vector</code> 코사인 검색</li>
+            <li>Redis — 세션 캐시 (선택적)</li>
+            <li>Prisma migrate로 스키마 자동화</li>
+            <li>ExamAttempt cascade delete 보장</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>IT 자격증 AI 학습 플랫폼</span><span>3 / 10</span></div>
+</section>
+
+<!-- ====== S4: RAG 파이프라인 ====== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="side-bar"></div>
+    <div class="slide-body">
+      <div class="slide-category">Core Algorithm</div>
+      <h2 class="slide-title">RAG 파이프라인 (Retrieval-Augmented Generation)</h2>
+      <div class="title-divider"></div>
+      <div class="grid-2" style="flex:1; min-height:0;">
+        <!-- Indexing -->
+        <div class="card" style="display:flex; flex-direction:column; gap:10px;">
+          <div class="card-title">① 인덱싱 — PDF → 벡터 저장</div>
+          <div class="frow" style="flex-wrap:wrap; gap:5px;">
+            <div class="fb fb-or" style="font-size:10.5px;">PDF 업로드<br><small>Multer</small></div>
+            <div class="farr">→</div>
+            <div class="fb fb-or" style="font-size:10.5px;">텍스트 추출<br><small>pdf-parse</small></div>
+            <div class="farr">→</div>
+            <div class="fb fb-pu" style="font-size:10.5px;">청킹<br><small>650ch / 100 overlap</small></div>
+            <div class="farr">→</div>
+            <div class="fb fb-gr" style="font-size:10.5px;">임베딩<br><small>768d vector</small></div>
+            <div class="farr">→</div>
+            <div class="fb fb-dk" style="font-size:10.5px;">pgvector<br><small>INSERT</small></div>
+          </div>
+          <div class="cb" style="flex:1;">
+<pre><span class="cm">// services/chunker.js — 슬라이딩 윈도우</span>
+<span class="kw">export function</span> <span class="fn">chunkText</span>(text, size=<span class="nm">650</span>, overlap=<span class="nm">100</span>) {
+  <span class="kw">let</span> start = <span class="nm">0</span>;
+  <span class="kw">while</span> (start <span class="op">&lt;</span> text.length) {
+    <span class="kw">let</span> end = start + size;
+    <span class="cm">// 문장 경계에서 자르기 (가독성 향상)</span>
+    <span class="kw">const</span> cut = slice.<span class="fn">lastIndexOf</span>(<span class="str">'. '</span>);
+    chunks.<span class="fn">push</span>(text.<span class="fn">slice</span>(start, end).<span class="fn">trim</span>());
+    start = Math.<span class="fn">max</span>(<span class="nm">0</span>, end - overlap); <span class="cm">// overlap</span>
+  }
+  <span class="kw">return</span> chunks;
+}</pre>
+          </div>
+        </div>
+        <!-- Retrieval + Generation -->
+        <div class="card" style="display:flex; flex-direction:column; gap:10px;">
+          <div class="card-title">② 문제 생성 — 쿼리 → LLM 출력</div>
+          <div class="frow" style="flex-wrap:wrap; gap:5px;">
+            <div class="fb fb-bl" style="font-size:10.5px;">토픽 입력<br><small>사용자 명령</small></div>
+            <div class="farr">→</div>
+            <div class="fb fb-gr" style="font-size:10.5px;">쿼리 임베딩<br><small>nomic-embed</small></div>
+            <div class="farr">→</div>
+            <div class="fb fb-pu" style="font-size:10.5px;">벡터 검색<br><small>Top-5 chunks</small></div>
+            <div class="farr">→</div>
+            <div class="fb fb-or" style="font-size:10.5px;">LLM 프롬프트<br><small>JSON 생성</small></div>
+          </div>
+          <div class="cb" style="flex:1;">
+<pre><span class="cm">// services/rag.js — 코사인 유사도 검색</span>
+<span class="kw">const</span> rows = <span class="kw">await</span> prisma.<span class="fn">$queryRawUnsafe</span>(
+  <span class="str">`SELECT content, source, page
+     FROM "Chunk"
+    WHERE source = $2
+    ORDER BY embedding &lt;=&gt; $1::vector
+    LIMIT $3`</span>,
+  vector, source, topK
+);
+<span class="cm">// 검색된 context를 프롬프트에 주입</span>
+<span class="kw">const</span> context = chunks
+  .<span class="fn">map</span>(c =&gt; c.content).<span class="fn">join</span>(<span class="str">'\n\n'</span>);</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>IT 자격증 AI 학습 플랫폼</span><span>4 / 10</span></div>
+</section>
+
+<!-- ====== S5: PDF 업로드 & 문제 생성 ====== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="side-bar"></div>
+    <div class="slide-body">
+      <div class="slide-category">Feature 01</div>
+      <h2 class="slide-title">PDF 업로드 & 문제 자동 생성</h2>
+      <div class="title-divider"></div>
+      <div class="split">
+        <div class="spl">
+          <p class="slide-desc">PDF 텍스트를 650자 단위로 청킹 후 768차원 벡터로 임베딩합니다. 토픽과 시험 유형을 입력하면 RAG 파이프라인이 상위 5개 청크를 검색해 JSON 형식의 문제를 생성합니다.</p>
+          <div class="cb">
+<pre><span class="cm">// routes/questions.js</span>
+router.<span class="fn">post</span>(<span class="str">'/generate'</span>, <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">const</span> { topic, examType, count, source } = req.body;
+  <span class="cm">// RAG: retrieve → prompt → LLM → parse JSON</span>
+  <span class="kw">const</span> items = <span class="kw">await</span> <span class="fn">generateQuestions</span>(
+    topic, examType, count, source
+  );
+  <span class="kw">await</span> prisma.question.<span class="fn">createMany</span>({ data: items });
+  res.<span class="fn">json</span>({ questions: items });
+});
+
+<span class="cm">// LLM 출력 JSON 예시</span>
+<span class="cm">// { "questions": [{</span>
+<span class="cm">//   "question": "...", "options": ["①"…"④"],</span>
+<span class="cm">//   "answer": 2, "explanation": "...",</span>
+<span class="cm">//   "topic": "...", "difficulty": "중" }] }</span></pre>
+          </div>
+          <div class="grid-2">
+            <div class="card" style="padding:10px 12px;">
+              <div class="card-title">입력</div>
+              <ul class="fl" style="font-size:11.5px;">
+                <li>PDF 파일 (Multer multipart)</li>
+                <li>토픽 / 자연어 명령</li>
+                <li>시험 유형 · 문제 수</li>
+              </ul>
+            </div>
+            <div class="card" style="padding:10px 12px;">
+              <div class="card-title">출력</div>
+              <ul class="fl" style="font-size:11.5px;">
+                <li>4지선다 문제 + 정답 + 해설</li>
+                <li>토픽 / 난이도 메타데이터</li>
+                <li>출처 PDF + 페이지 번호</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="spr" style="display:flex; flex-direction:column; gap:28px; align-self:flex-start;">
+          <img src="../../assets/portfolio/ai/screenshots/img2.png" class="ss" style="width:100%; height:auto; display:block;" />
+          <img src="../../assets/portfolio/ai/screenshots/img3.png" class="ss" style="width:100%; height:auto; display:block;" />
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>IT 자격증 AI 학습 플랫폼</span><span>5 / 10</span></div>
+</section>
+
+<!-- ====== S6: 퀴즈 & 시험 모드 ====== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="side-bar"></div>
+    <div class="slide-body">
+      <div class="slide-category">Feature 02 · 03</div>
+      <h2 class="slide-title">퀴즈 모드 & 시험 시뮬레이션</h2>
+      <div class="title-divider"></div>
+      <div class="grid-2" style="flex:1; min-height:0;">
+        <div style="display:flex; flex-direction:column; gap:10px; overflow:hidden;">
+          <div class="card">
+            <div class="card-title">퀴즈 모드 <span class="badge b-bl">Quiz</span></div>
+            <ul class="fl">
+              <li>소스 PDF + 자연어 명령으로 즉석 문제 생성</li>
+              <li>타이머 없는 자유 풀이 / 즉시 해설 확인</li>
+              <li>오답 즉시 오답노트로 저장 가능</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">시험 시뮬레이션 <span class="badge b-gr">Exam</span></div>
+            <ul class="fl">
+              <li>AWS SAA · SQLD · 리눅스마스터 등 유형 선택</li>
+              <li>카운트다운 타이머로 실전 시험 환경 구현</li>
+              <li>자동 채점 + 점수 · 정답률 산출</li>
+              <li>문항별 이력 ExamAttemptItem 으로 저장</li>
+            </ul>
+          </div>
+          <div class="cb" style="flex:1; min-height:0;">
+<pre><span class="cm">// routes/exam.js — 채점 + 이력 저장</span>
+router.<span class="fn">post</span>(<span class="str">'/grade'</span>, <span class="kw">async</span> (req, res) =&gt; {
+  <span class="kw">const</span> { examType, source, answers } = req.body;
+  <span class="kw">const</span> correct = answers.<span class="fn">filter</span>(a =&gt; a.isCorrect).length;
+  <span class="kw">const</span> attempt = <span class="kw">await</span> prisma.examAttempt.<span class="fn">create</span>({
+    data: {
+      examType, source, correct,
+      total: answers.length,
+      percent: Math.<span class="fn">round</span>(correct / answers.length * <span class="nm">100</span>),
+      items: { <span class="fn">createMany</span>({ data: answers }) }
+    }
+  });
+  res.<span class="fn">json</span>(attempt);
+});</pre>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px; overflow:hidden;">
+          <img src="../../assets/portfolio/ai/screenshots/img3.png" class="ss" style="flex:1; height:0;" />
+          <img src="../../assets/portfolio/ai/screenshots/img4.png" class="ss" style="flex:1; height:0;" />
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>IT 자격증 AI 학습 플랫폼</span><span>6 / 10</span></div>
+</section>
+
+<!-- ====== S7: 오답노트 & AI 튜터 ====== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="side-bar"></div>
+    <div class="slide-body">
+      <div class="slide-category">Feature 04 · 05</div>
+      <h2 class="slide-title">오답 노트 & 실시간 AI 튜터 (SSE 스트리밍)</h2>
+      <div class="title-divider"></div>
+      <div class="grid-2" style="flex:1; min-height:0;">
+        <div style="display:flex; flex-direction:column; gap:10px; overflow:hidden;">
+          <div class="card">
+            <div class="card-title">오답 노트 <span class="badge b-pu">Wrong Notes</span></div>
+            <ul class="fl">
+              <li>틀린 문제 저장 → reviewCount · nextReview 관리</li>
+              <li>동일 토픽 RAG로 유사 문제 3개 즉시 재생성</li>
+              <li>WeaknessChart로 취약 토픽 시각화</li>
+            </ul>
+          </div>
+          <div class="card">
+            <div class="card-title">AI 튜터 — Server-Sent Events 스트리밍</div>
+            <ul class="fl">
+              <li>오답 선택 시 SSE 스트림 개방 (EventSource)</li>
+              <li>RAG context 주입 후 LLM 설명을 실시간 스트리밍</li>
+              <li>청크 단위 전송으로 응답 대기 없는 UX 구현</li>
+            </ul>
+          </div>
+          <div class="cb" style="flex:1;">
+<pre><span class="cm">// routes/tutor.js — SSE 스트리밍</span>
+res.<span class="fn">setHeader</span>(<span class="str">'Content-Type'</span>, <span class="str">'text/event-stream'</span>);
+res.<span class="fn">setHeader</span>(<span class="str">'Cache-Control'</span>, <span class="str">'no-cache'</span>);
+
+<span class="kw">const</span> stream = <span class="kw">await</span> client.chat.completions.<span class="fn">create</span>({
+  model: CHAT_MODEL,
+  messages: [
+    { role: <span class="str">'system'</span>, content: context },  <span class="cm">// RAG 주입</span>
+    { role: <span class="str">'user'</span>,   content: question }
+  ],
+  stream: <span class="kw">true</span>,
+});
+
+<span class="kw">for await</span> (<span class="kw">const</span> chunk <span class="kw">of</span> stream) {
+  <span class="kw">const</span> text = chunk.choices[<span class="nm">0</span>]?.delta?.content || <span class="str">''</span>;
+  <span class="kw">if</span> (text) res.<span class="fn">write</span>(<span class="str">`data: </span>${JSON.<span class="fn">stringify</span>({ text })}<span class="str">\n\n`</span>);
+}
+res.<span class="fn">write</span>(<span class="str">'data: [DONE]\n\n'</span>); res.<span class="fn">end</span>();</pre>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:8px; overflow:hidden;">
+          <img src="../../assets/portfolio/ai/screenshots/img5.png" class="ss" style="flex:1; height:0;" />
+          <img src="../../assets/portfolio/ai/screenshots/img6.png" class="ss" style="flex:1; height:0;" />
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>IT 자격증 AI 학습 플랫폼</span><span>7 / 10</span></div>
+</section>
+
+<!-- ====== S8: 코드 하이라이트 ====== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="side-bar"></div>
+    <div class="slide-body">
+      <div class="slide-category">Code Highlight</div>
+      <h2 class="slide-title">핵심 구현 코드</h2>
+      <div class="title-divider"></div>
+      <div class="grid-2" style="flex:1; min-height:0;">
+        <!-- LLM JSON 안정화 -->
+        <div style="display:flex; flex-direction:column; gap:9px; overflow:hidden;">
+          <div class="card" style="padding:10px 12px;">
+            <div class="card-title">LLM 출력 안정화 — JSON Retry 패턴</div>
+            <p style="font-size:11.5px; color:var(--sub); line-height:1.5;">코드 펜스 제거 → 중괄호 추출 → JSON.parse 실패 시 최대 1회 재시도</p>
+          </div>
+          <div class="cb" style="flex:1;">
+<pre><span class="cm">// services/rag.js</span>
+<span class="kw">function</span> <span class="fn">extractJsonCandidate</span>(raw) {
+  <span class="kw">const</span> cleaned = raw
+    .<span class="fn">replace</span>(<span class="op">/```json|```/g</span>, <span class="str">''</span>).<span class="fn">trim</span>();
+  <span class="kw">const</span> start = cleaned.<span class="fn">indexOf</span>(<span class="str">'{'</span>);
+  <span class="kw">const</span> end   = cleaned.<span class="fn">lastIndexOf</span>(<span class="str">'}'</span>);
+  <span class="kw">return</span> cleaned.<span class="fn">slice</span>(start, end + <span class="nm">1</span>);
+}
+
+<span class="kw">async function</span> <span class="fn">callQuestionsModel</span>(prompt, maxRetry=<span class="nm">1</span>) {
+  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="nm">0</span>; i <span class="op">&lt;=</span> maxRetry; i++) {
+    <span class="kw">const</span> res = <span class="kw">await</span> client.chat.completions.<span class="fn">create</span>({
+      model: CHAT_MODEL,
+      messages: [{ role: <span class="str">'user'</span>, content: prompt }],
+      max_tokens: <span class="nm">2600</span>,
+    });
+    <span class="kw">const</span> raw = res.choices[<span class="nm">0</span>]?.message?.content || <span class="str">''</span>;
+    <span class="kw">try</span> { <span class="kw">return</span> <span class="fn">parseQuestions</span>(raw); }
+    <span class="kw">catch</span> (e) { <span class="kw">if</span> (i === maxRetry) <span class="kw">throw</span> e; }
+  }
+}</pre>
+          </div>
+        </div>
+        <!-- Prisma + pgvector -->
+        <div style="display:flex; flex-direction:column; gap:9px; overflow:hidden;">
+          <div class="card" style="padding:10px 12px;">
+            <div class="card-title">Prisma + pgvector — Raw SQL 벡터 연산</div>
+            <p style="font-size:11.5px; color:var(--sub); line-height:1.5;">Unsupported("vector") 필드는 ORM 불가 → $executeRawUnsafe / $queryRawUnsafe 직접 사용</p>
+          </div>
+          <div class="cb" style="flex:1;">
+<pre><span class="cm">// 벡터 저장 (INSERT)</span>
+<span class="kw">await</span> prisma.<span class="fn">$executeRawUnsafe</span>(
+  <span class="str">`INSERT INTO "Chunk"
+   (id, content, embedding, source, page)
+   VALUES ($1, $2, $3::vector, $4, $5)`</span>,
+  <span class="fn">randomUUID</span>(), content,
+  <span class="str">`[</span>${vec.<span class="fn">join</span>(<span class="str">','</span>)}<span class="str">]`</span>,
+  source, page
+);
+
+<span class="cm">// 코사인 거리 검색 (SELECT)</span>
+<span class="cm">// embedding &lt;=&gt; $1::vector (pgvector 연산자)</span>
+<span class="kw">const</span> rows = <span class="kw">await</span> prisma.<span class="fn">$queryRawUnsafe</span>(
+  <span class="str">`SELECT content, source, page
+     FROM "Chunk"
+    WHERE source = $2
+    ORDER BY embedding &lt;=&gt; $1::vector
+    LIMIT $3`</span>,
+  <span class="str">`[</span>${queryVec}<span class="str">]`</span>, source, topK
+);</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>IT 자격증 AI 학습 플랫폼</span><span>8 / 10</span></div>
+</section>
+
+<!-- ====== S9: 데이터 모델 ====== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="side-bar"></div>
+    <div class="slide-body">
+      <div class="slide-category">Data Model</div>
+      <h2 class="slide-title">Prisma 스키마 — 5개 모델</h2>
+      <div class="title-divider"></div>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; grid-template-rows:1fr 1fr; gap:12px; flex:1; min-height:0;">
+        <div class="sbox">
+          <div class="sname">Chunk <span style="font-size:11px;color:var(--sub);font-weight:400;">— PDF 청크 + 벡터</span></div>
+          <div class="sfield">
+            <span class="sk">id</span>        <span class="st">String</span>    @id cuid()<br>
+            <span class="sk">content</span>   <span class="st">String</span><br>
+            <span class="sk">embedding</span> <span class="st">vector(768)</span> <span style="color:#64748b;">// pgvector</span><br>
+            <span class="sk">source</span>    <span class="st">String</span>    <span style="color:#64748b;">// PDF 파일명</span><br>
+            <span class="sk">page</span>      <span class="st">Int</span>
+          </div>
+        </div>
+        <div class="sbox">
+          <div class="sname">Question <span style="font-size:11px;color:var(--sub);font-weight:400;">— 생성된 문제</span></div>
+          <div class="sfield">
+            <span class="sk">id</span>          <span class="st">String</span>  @id cuid()<br>
+            <span class="sk">content</span>     <span class="st">String</span><br>
+            <span class="sk">options</span>     <span class="st">Json</span>    <span style="color:#64748b;">// ["①"…"④"]</span><br>
+            <span class="sk">answer</span>      <span class="st">Int</span>     <span style="color:#64748b;">// 0-3 인덱스</span><br>
+            <span class="sk">explanation</span> <span class="st">String</span><br>
+            <span class="sk">topic</span>       <span class="st">String</span><br>
+            <span class="sk">difficulty</span>  <span class="st">String</span>  <span style="color:#64748b;">// 상|중|하</span><br>
+            <span class="sk">examType</span>    <span class="st">String</span>
+          </div>
+        </div>
+        <div class="sbox">
+          <div class="sname">WrongAnswer <span style="font-size:11px;color:var(--sub);font-weight:400;">— 오답노트</span></div>
+          <div class="sfield">
+            <span class="sk">id</span>            <span class="st">String</span>   @id cuid()<br>
+            <span class="sk">question</span>      <span class="st">String</span><br>
+            <span class="sk">myAnswer</span>      <span class="st">Int</span><br>
+            <span class="sk">correctAnswer</span> <span class="st">Int</span><br>
+            <span class="sk">topic</span>         <span class="st">String</span><br>
+            <span class="sk">reviewCount</span>   <span class="st">Int</span>      @default(0)<br>
+            <span class="sk">nextReview</span>    <span class="st">DateTime</span> @default(now())
+          </div>
+        </div>
+        <div class="sbox">
+          <div class="sname">ExamAttempt <span style="font-size:11px;color:var(--sub);font-weight:400;">— 시험 세션</span></div>
+          <div class="sfield">
+            <span class="sk">id</span>        <span class="st">String</span>   @id cuid()<br>
+            <span class="sk">examType</span>  <span class="st">String</span><br>
+            <span class="sk">source</span>    <span class="st">String</span><br>
+            <span class="sk">total</span>     <span class="st">Int</span><br>
+            <span class="sk">correct</span>   <span class="st">Int</span><br>
+            <span class="sk">percent</span>   <span class="st">Int</span><br>
+            <span class="sk">items</span>     <span class="st">ExamAttemptItem[]</span>
+          </div>
+        </div>
+        <div class="sbox" style="grid-column:2/4;">
+          <div class="sname">ExamAttemptItem <span style="font-size:11px;color:var(--sub);font-weight:400;">— 문항별 이력</span></div>
+          <div class="sfield" style="display:grid; grid-template-columns:1fr 1fr; gap:0 20px;">
+            <div>
+              <span class="sk">id</span>        <span class="st">String</span>   @id cuid()<br>
+              <span class="sk">attemptId</span> <span class="st">String</span>   → ExamAttempt<br>
+              <span class="sk">orderNo</span>   <span class="st">Int</span><br>
+              <span class="sk">question</span>  <span class="st">String</span><br>
+              <span class="sk">options</span>   <span class="st">Json</span>
+            </div>
+            <div>
+              <span class="sk">picked</span>      <span class="st">Int</span><br>
+              <span class="sk">answer</span>      <span class="st">Int</span><br>
+              <span class="sk">isCorrect</span>   <span class="st">Boolean</span><br>
+              <span class="sk">topic</span>       <span class="st">String</span><br>
+              <span style="color:#64748b; font-style:italic;">@@index([attemptId, orderNo])</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>IT 자격증 AI 학습 플랫폼</span><span>9 / 10</span></div>
+</section>
+
+<!-- ====== S10: 성과 & 개선 계획 ====== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="side-bar"></div>
+    <div class="slide-body">
+      <div class="slide-category">Outcome</div>
+      <h2 class="slide-title">성과 및 개선 계획</h2>
+      <div class="title-divider"></div>
+      <div class="grid-2" style="flex:1; min-height:0;">
+        <div class="card">
+          <div class="card-title">성과</div>
+          <ul class="fl" style="font-size:14.5px; line-height:2;">
+            <li>PDF 업로드부터 문제 생성까지 <strong>단일 플랫폼</strong>으로 완결</li>
+            <li>Ollama 로컬 실행으로 API 비용 0원, 데이터 외부 유출 없음</li>
+            <li>SSE 스트리밍으로 AI 튜터 <strong>실시간 UX</strong> 구현</li>
+            <li>pgvector 코사인 검색으로 토픽 맥락 정확도 향상</li>
+            <li>Prisma cascade 삭제로 데이터 정합성 자동 보장</li>
+            <li>JSON retry 패턴으로 LLM 출력 불안정성 대응</li>
+          </ul>
+        </div>
+        <div class="card">
+          <div class="card-title">개선 계획</div>
+          <ul class="fl" style="font-size:14.5px; line-height:2;">
+            <li>간격 반복(Spaced Repetition) 알고리즘 고도화</li>
+            <li>취약 토픽 기반 문제 자동 추천 (WeaknessChart 활용)</li>
+            <li>Vitest + Supertest 테스트 커버리지 확보</li>
+            <li>Docker 단일 이미지 배포 파이프라인 자동화</li>
+            <li>멀티 모델 선택 UI (모델 성능 비교 실험)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>IT 자격증 AI 학습 플랫폼</span><span>10 / 11</span></div>
+</section>
+
+<!-- ====== S11: Q&A / Closing ====== -->
+<section class="slide">
+  <div class="slide-inner">
+    <div class="side-bar"></div>
+    <div class="slide-body" style="justify-content:center; align-items:center; text-align:center; gap:20px;">
+      <div class="slide-category">Closing</div>
+      <h2 style="font-size:48px; font-weight:700; color:var(--text); line-height:1.2;">감사합니다.</h2>
+      <div class="title-divider" style="margin:0 auto;"></div>
+      <p class="slide-desc" style="font-size:16px; line-height:2.2;">
+        <span style="color:var(--accent); font-weight:500;">Stack:</span> React · Node.js · Express · PostgreSQL · pgvector · Ollama · Docker
+      </p>
+      <div style="display:flex; gap:10px; justify-content:center; margin-top:6px;">
+        <span class="chip">React + Vite</span>
+        <span class="chip">Node.js / Express</span>
+        <span class="chip">PostgreSQL + pgvector</span>
+        <span class="chip">Ollama (gpt-oss:20b)</span>
+        <span class="chip">Docker</span>
+      </div>
+    </div>
+  </div>
+  <div class="slide-footer"><span>IT 자격증 AI 학습 플랫폼</span><span>11 / 11</span></div>
+</section>
+
+</div><!-- #stage -->
+</div><!-- #app -->
+
+<div id="nav">
+  <button type="button" onclick="goPrev()">&#8592;</button>
+  <span id="slide-counter">1 / 11</span>
+  <button type="button" onclick="goNext()">&#8594;</button>
+</div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total = slides.length;
+  const counter = document.getElementById('slide-counter');
+  let cur = 0;
+  function sync() {
+    slides.forEach((s, i) => s.classList.toggle('active', i === cur));
+    counter.textContent = `${cur + 1} / ${total}`;
+  }
+  function goTo(n) { cur = (n + total) % total; sync(); }
+  function goNext() { goTo(cur + 1); }
+  function goPrev() { goTo(cur - 1); }
+
+  const isEmbedded = window.self !== window.top;
+  function fitEmbeddedStage() {
+    if (!isEmbedded) return;
+    const stage = document.getElementById('stage');
+    const pad = 20, navH = 78;
+    const scale = Math.min((window.innerWidth - pad) / 1280, (window.innerHeight - navH - pad) / 720, 1);
+    stage.style.transform = `scale(${scale})`;
+  }
+  if (isEmbedded) {
+    document.body.classList.add('is-embedded');
+    fitEmbeddedStage();
+    window.addEventListener('resize', fitEmbeddedStage);
+  }
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goNext(); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); goPrev(); }
+  });
+</script>
+</body>
+</html>

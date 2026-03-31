@@ -14,6 +14,7 @@
 - 자기소개 모달과 연락 유도 CTA 제공
 - 기술 스택 및 작업 경험 시각화
 - 프레임워크 아이콘 marquee 영역과 애니메이션 효과
+- 프로젝트별 `Live Demo` 모달(포트폴리오 슬라이드 HTML 임베드)
 - 메일 링크 연동을 통한 빠른 연락 기능
 
 ## Tech Stack
@@ -35,16 +36,22 @@
 ## Project Structure
 
 ```text
-web_profile/
+web-profile/
 ├── index.html
 ├── pages/
-│   └── todoList_portfolio.html
+│   └── portfolio/
+│       ├── todoList_portfolio.html
+│       └── ai_project_portfolio.html
 ├── assets/
 │   ├── css/
 │   │   ├── reset.css
 │   │   └── style.css
 │   ├── js/
 │   │   └── main.js
+│   ├── portfolio/
+│   │   └── ai/
+│   │       ├── icons/
+│   │       └── screenshots/
 │   └── images/
 │       ├── about/
 │       ├── blog/
@@ -60,6 +67,12 @@ web_profile/
 1. 저장소를 클론하거나 다운로드합니다.
 2. `index.html`을 브라우저에서 열거나, 로컬 서버로 실행합니다.
 3. 권장 실행 방식은 VS Code Live Server 입니다.
+
+## Portfolio Slides
+
+- `Backend` 탭의 `TodoList`, `IT 자격증 AI 학습 플랫폼` 카드는 `Live Demo` 버튼 클릭 시 모달로 슬라이드 페이지를 엽니다.
+- 포트폴리오 슬라이드 문서는 `pages/portfolio/` 하위에서 관리합니다.
+- AI 프로젝트 스크린샷/아이콘 리소스는 `assets/portfolio/ai/` 하위에서 관리합니다.
 
 ## Highlights
 
