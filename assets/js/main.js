@@ -31,14 +31,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     const observerOptions = {
-        threshold: 0.1,
+        threshold: 0,
         rootMargin: '0px 0px -50px 0px'
     };
-    
+
     const observer = new IntersectionObserver(function(entries) {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
                 entry.target.classList.add('visible');
+                observer.unobserve(entry.target);
             }
         });
     }, observerOptions);
@@ -257,6 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isScrolling || !hasUserInteracted) return;
         
         const currentSection = document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2);
+        if (!currentSection) return;
         const section = currentSection.closest('section');
         
         if (section && section.classList.contains('hero')) {
