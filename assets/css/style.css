@@ -124,9 +124,20 @@ section.visible .reveal-item {opacity: 1; transform: translate(0, 0) scale(1);}
     }
 }
 
+/* ----- Tech Stack Section ----- */
+.stack-section {background: #fff; padding: 80px 0;}
+.stack-columns {display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(24px, 4vw, 56px);}
+.stack-column {border-top: 2px solid var(--text-heading);}
+.stack-column h3 {display: flex; align-items: baseline; gap: 10px; padding: 18px 0 10px; font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; color: var(--text-heading);}
+.stack-column h3 span {font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; color: var(--brand-muted);}
+.stack-column ul {list-style: none; padding: 0;}
+.stack-column li {padding: 13px 0; border-bottom: 1px solid rgba(79, 111, 125, 0.12); font-size: 1rem; font-weight: 500; color: var(--text-body); transition: color 0.2s ease, padding-left 0.2s ease;}
+.stack-column li:hover {color: var(--text-heading); padding-left: 6px;}
+
 /* ----- Work / Projects Section ----- */
 .work {background-color: var(--accent-soft); padding: 60px 0;}
 .about .section-header,
+.stack-section .section-header,
 .work .section-header,
 .contact .section-header {text-align: left; margin-bottom: 36px;}
 
@@ -272,33 +283,6 @@ section.visible .reveal-item {opacity: 1; transform: translate(0, 0) scale(1);}
 .footer-highlight {color: var(--brand); font-weight: 600;}
 .footer-copy {color: #9ca3af;}
 
-/* ----- Skills Page ----- */
-.skills-page {background: var(--accent-soft);}
-.skills-topbar {position: sticky; top: 0; z-index: 10; padding: 16px 0; background: rgba(244, 246, 250, 0.9); backdrop-filter: blur(8px); border-bottom: 1px solid rgba(79, 111, 125, 0.1);}
-.skills-back {font-size: 0.95rem; font-weight: 500; color: var(--accent-text); text-decoration: none;}
-.skills-back:hover {color: var(--brand); text-decoration: underline; text-underline-offset: 3px;}
-.skills-main {padding: 56px 0 80px;}
-.skills-head {text-align: left; margin-bottom: 40px;}
-.skills-kicker {font-size: 0.68rem; letter-spacing: 0.22em; font-weight: 600; color: var(--brand-muted); margin-bottom: 10px;}
-.skills-lead {max-width: 46rem; font-size: 1rem; line-height: 1.8; color: var(--text-body); word-break: keep-all;}
-
-.stars {color: #e0a83a; letter-spacing: 0.12em; font-size: 1.05rem; line-height: 1;}
-.skills-legend {margin-bottom: 48px; padding: 24px 28px; background: #fff; border: 1px solid var(--brand-soft); border-radius: 16px;}
-.skills-legend h3 {font-size: 1.06rem; color: var(--text-heading); margin-bottom: 14px;}
-.legend-list {list-style: none; padding: 0; display: grid; gap: 10px;}
-.legend-list li {display: flex; align-items: center; flex-wrap: wrap; gap: 6px 14px; font-size: 0.92rem; color: var(--text-body);}
-.legend-list strong {min-width: 3.5em; color: var(--text-heading); font-weight: 600;}
-
-.skills-group {padding: 0; margin-bottom: 48px;}
-.skills-group-title {font-size: 1.5rem; font-weight: 700; color: var(--text-heading); margin-bottom: 18px; padding-bottom: 10px; border-bottom: 2px solid var(--brand);}
-.skills-list {display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px;}
-.skill-card {display: flex; flex-direction: column; gap: 10px; padding: 22px; background: #fff; border-radius: 15px; box-shadow: 0 4px 16px rgba(45, 74, 86, 0.06); border: 1px solid rgba(79, 111, 125, 0.08);}
-.skill-card-head {display: flex; align-items: center; justify-content: space-between; gap: 10px;}
-.skill-card-head h4 {font-size: 1.1rem; font-weight: 600; color: var(--text-heading);}
-.skill-level {flex-shrink: 0; background: var(--brand-soft); color: var(--brand); padding: 4px 10px; border-radius: 20px; font-size: 0.78rem; font-weight: 600;}
-.skill-desc {font-size: 0.93rem; line-height: 1.65; color: var(--text-body); word-break: keep-all;}
-.skills-page .footer {padding-top: 0;}
-
 /* ----- Responsive ----- */
 @media (max-width: 768px) {
     .container {
@@ -391,19 +375,6 @@ section.visible .reveal-item {opacity: 1; transform: translate(0, 0) scale(1);}
         gap: 6px;
     }
 
-    .skills-main {
-        padding: 36px 0 56px;
-    }
-
-    .skills-legend {
-        padding: 18px;
-    }
-
-    .skills-list {
-        grid-template-columns: 1fr;
-        gap: 14px;
-    }
-
     .work-details {
         flex-direction: column;
         gap: 10px;
@@ -494,10 +465,20 @@ section.visible .reveal-item {opacity: 1; transform: translate(0, 0) scale(1);}
     }
     
     .about .section-header,
+    .stack-section .section-header,
     .work .section-header,
     .contact .section-header {
         text-align: center;
         margin-bottom: 32px;
+    }
+
+    .stack-section {
+        padding: 56px 0;
+    }
+
+    .stack-columns {
+        grid-template-columns: 1fr;
+        gap: 32px;
     }
 
     .contact-content {

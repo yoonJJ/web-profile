@@ -13,7 +13,7 @@
 - 섹션 단위 스크롤 흐름과 인터랙션 중심 UI
 - 자기소개 모달과 연락 유도 CTA 제공
 - About 영역 GitHub / 블로그 외부 링크
-- 기술별 숙련도(별점·수준 설명)를 정리한 `Tech Stack` 페이지
+- 분야별(Frontend / Backend / DevOps & Tools) 기술 스택 목록
 - 기술 스택 및 작업 경험 시각화
 - 프레임워크 아이콘 marquee 영역과 애니메이션 효과
 - 프로젝트별 `Live Demo` 모달(포트폴리오 슬라이드 HTML 임베드)
@@ -31,11 +31,10 @@
 1. `Hero` - 메인 카피와 핵심 소개
 2. `About` - 프로필, 자기소개, 주요 역량
 3. `Framework Marquee` - 기술 아이콘 시각 영역
-4. `Work Experience` - 프로젝트 및 실무 경험 소개
-5. `Blog` - 학습/기록 성격의 콘텐츠 카드
-6. `Contact` - 이메일과 협업 문의 영역
-
-별도 페이지: `pages/skills.html` - 숙련도 기준표와 Frontend / Backend / DevOps & Tools 기술별 숙련도
+4. `Tech Stack` - 분야별 기술 스택 목록
+5. `Work Experience` - 프로젝트 및 실무 경험 소개
+6. `Blog` - 학습/기록 성격의 콘텐츠 카드
+7. `Contact` - 이메일과 협업 문의 영역
 
 ## Project Structure
 
@@ -43,7 +42,6 @@
 web-profile/
 ├── index.html
 ├── pages/
-│   ├── skills.html
 │   └── portfolio/
 │       ├── todoList_portfolio.html
 │       └── ai_project_portfolio.html

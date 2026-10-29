@@ -63,6 +63,8 @@ document.addEventListener('DOMContentLoaded', function() {
     addRevealItems('.about-image', 'reveal-left');
     addRevealItems('.about-text', 'reveal-right');
     addRevealItems('.framework-marquee', 'reveal-zoom');
+    addRevealItems('.stack-section .section-header', 'reveal-left');
+    addRevealItems('.stack-column', 'reveal-item');
     addRevealItems('.work .section-header', 'reveal-left');
     addRevealItems('.work .project-card', 'reveal-item');
     addRevealItems('.blog-intro', 'reveal-left');
